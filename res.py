@@ -121,8 +121,6 @@ def readconfig():
 def main():
     username, password, venue, dates, guests = readconfig()
     auth_token, payment_method_string = login(username, password)
-    print("PAYMENT METHOD STR")
-    print(payment_method_string)
     print(
         "logged in succesfully - disown this task and allow it to run in the background"
     )
