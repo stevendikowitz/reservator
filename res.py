@@ -1,8 +1,6 @@
 import requests
 import datetime
 import time
-import csv
-import sys
 from config import DATA
 
 headers = {
@@ -131,7 +129,6 @@ def main():
     party_size = int(guests)
     table_time = 20
     days = [datetime.datetime.strptime(date, "%m/%d/%Y") for date in dates]
-    # day = datetime.datetime.strptime(date, "%m/%d/%Y")
     restaurant = int(venue)
 
     reserved = 0

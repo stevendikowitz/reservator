@@ -1,4 +1,4 @@
-USERNAME = "YOUR_EMAIL@gmail.com"
+USERNAME = "YOUR_EMAIL@whatever.com"
 PASSWORD = "YOUR_PASSWORD"
 
 
