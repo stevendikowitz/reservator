@@ -44,7 +44,7 @@ def find_table(res_date, party_size, table_time, auth_token, venue_id):
     day = res_date.strftime("%Y-%m-%d")
     ct = datetime.datetime.now()
     ct = ct.strftime("%H:%M:%S")
-    print(f"[{ct}]:  Trying {day}...\n")
+    print(f"[{ct}]:  Trying {day} for {str(venue_id)}...\n")
     params = (
         # ("x-resy-auth-token", auth_token),
         ("day", day),
@@ -136,7 +136,7 @@ def readconfig():
 
 
 def main():
-    username, password, venue, dates, guests = readconfig()
+    username, password, venue, dates, guests, venues = readconfig()
     auth_token, payment_method_string = login(username, password)
     print(
         "logged in succesfully - disown this task and allow it to run in the background"
@@ -147,21 +147,27 @@ def main():
     restaurant = int(venue)
 
     reserved = 0
-    while reserved == 0:
+    unreserved_restaurants = venues
+    while len(unreserved_restaurants) > 0:
         for day in days:
-            try:
-                reserved = try_table(
-                    day,
-                    party_size,
-                    table_time,
-                    auth_token,
-                    restaurant,
-                    payment_method_string,
-                )
-                time.sleep(1)
-            except Exception as e:
-                print(e)
-                raise e
+            for restaurant in unreserved_restaurants:
+                try:
+                    reserved = try_table(
+                        day,
+                        party_size,
+                        table_time,
+                        auth_token,
+                        int(restaurant),
+                        payment_method_string,
+                    )
+                    if reserved == 1:
+                        unreserved_restaurants = [
+                            r for r in unreserved_restaurants if r != restaurant
+                        ]
+                    time.sleep(1)
+                except Exception as e:
+                    print(e)
+                    raise e
 
 
 main()
