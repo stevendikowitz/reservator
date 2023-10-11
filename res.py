@@ -2,18 +2,27 @@ import requests
 import datetime
 import time
 from config import DATA
+from requests_toolbelt.utils import dump
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 headers = {
-    "origin": "https://resy.com",
-    "accept-encoding": "gzip, deflate, br",
-    "x-origin": "https://resy.com",
-    "accept-language": "en-US,en;q=0.9",
-    "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
-    "content-type": "application/x-www-form-urlencoded",
-    "accept": "application/json, text/plain, */*",
-    "referer": "https://resy.com/",
     "authority": "api.resy.com",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36",
+    "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
+    "x-origin": "https://resy.com",
+    "sec-ch-ua-mobile": "?0",
+    "authorization": 'ResyAPI api_key="VbWk7s3L4KiK5fzlO7JD3Q5EYolJI7n5"',
+    "accept": "application/json, text/plain, */*",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
+    "cache-control": "no-cache",
+    "sec-ch-ua-platform": '"Windows"',
+    "origin": "https://resy.com",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "https://resy.com/",
+    "accept-language": "en-US,en;q=0.9",
 }
 
 
@@ -24,6 +33,7 @@ def login(username, password):
         "https://api.resy.com/3/auth/password", headers=headers, data=data
     )
     res_data = response.json()
+    # pp.pprint(res_data)
     auth_token = res_data["token"]
     payment_method_string = '{"id":' + str(res_data["payment_method_id"]) + "}"
     return auth_token, payment_method_string
@@ -32,15 +42,22 @@ def login(username, password):
 def find_table(res_date, party_size, table_time, auth_token, venue_id):
     # convert datetime to string
     day = res_date.strftime("%Y-%m-%d")
-    print(f"Trying {day}...")
+    ct = datetime.datetime.now()
+    ct = ct.strftime("%H:%M:%S")
+    print(f"[{ct}]:  Trying {day}...\n")
     params = (
-        ("x-resy-auth-token", auth_token),
+        # ("x-resy-auth-token", auth_token),
         ("day", day),
         ("lat", "0"),
         ("long", "0"),
         ("party_size", str(party_size)),
         ("venue_id", str(venue_id)),
     )
+    headers["x-resy-auth-token"] = auth_token
+    headers[
+        "x-resy-universal-auth"
+    ] = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3MDA4NzkyMjEsInVpZCI6OTM4ODA0OCwiZ3QiOiJjb25zdW1lciIsImdzIjpbXSwibGFuZyI6ImVuLXVzIiwiZXh0cmEiOnsiZ3Vlc3RfaWQiOjQzNDcwNTg2fX0.AIaD2v342CzwkNlJnKPdHs_fHWUC-LBc22jd05meHL1BiSmRGVXzBJjA2ye9swpuIYHRGn6fdxs9KxX4KiVkyztAAby4ATRxhftRnMjA5brZ6Gg1BqTHXVFO_wyv9-zIupnw7NaKjUqsc0cf4fJ8aOCGWLCBWFHtysV2t-8-XVnHEDi8"
+
     response = requests.get(
         "https://api.resy.com/4/find", headers=headers, params=params
     )
@@ -141,8 +158,10 @@ def main():
                     restaurant,
                     payment_method_string,
                 )
+                time.sleep(1)
             except Exception as e:
                 print(e)
+                raise e
 
 
 main()
